@@ -3,6 +3,22 @@
 A set of React custom hooks for data fetching and posting with xstate integrated, providing precise state transitions
 without the risk of yielding impossible states.
 
+## Installation
+
+### yarn
+
+```bash
+yarn add async-data-hooks
+```
+
+or
+
+### npm
+
+```bash
+npm install --save async-data-hooks
+```
+
 ## Example usage
 
 ### `useGet`
