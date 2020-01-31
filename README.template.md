@@ -106,7 +106,7 @@ Then go to `http://localhost:3000/?machine=fetchDataMachine` or `http://localhos
 
 ### `fetchDataMachine`
 
-![image](/uploads/ee6b3d50491a7c04a30c5a8358212f1e/image.png)
+![image](https://user-images.githubusercontent.com/11829847/73526781-e34e8a80-444c-11ea-84ba-9779f720f02e.png)
 
 https://xstate.js.org/viz/?gist=e7160418a7b8ef1562659a710bdf1153
 
@@ -119,7 +119,7 @@ As the diagram illustrates:
 
 ### `postDataMachine`
 
-![image](/uploads/9d0e96b3894350b9f6e0ad3f24adaa20/image.png)
+![image](https://user-images.githubusercontent.com/11829847/73526837-fb260e80-444c-11ea-8064-f24add89738d.png)
 
 https://xstate.js.org/viz/?gist=908f3f79147e24637fa2c06473ec0c8b
 
