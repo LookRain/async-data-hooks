@@ -1,4 +1,4 @@
-# `stateful-async-data-hooks`
+# `async-data-hooks`
 
 A set of React custom hooks for data fetching and posting with xstate integrated, providing precise state transitions
 without the risk of yielding impossible states.
