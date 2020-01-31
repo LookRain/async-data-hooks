@@ -1,4 +1,4 @@
-# `async-data-hooks`
+# ⚓Async Data Hooks
 
 A set of React custom hooks for data fetching and posting with xstate integrated, providing precise state transitions
 without the risk of yielding impossible states.
@@ -81,10 +81,6 @@ const CatsComponent = () => {
 };
 ```
 
-## API
-
-{{>main}}
-
 ## State Machine
 
 Under the hood, a finite state machine determines what state data is in. You can access the state directly from `xstateNode.value`, and compare it manually, or just use the `matchState` function exposed, or use the very handy `matcher` object that contains booleans like `fetching` `success` `fail` for easy state matching.
@@ -98,7 +94,7 @@ With a state machine, all possible state transitions are pre-defined. The benefi
 2. Simplified way to check data state:
    - you no longer need to manage multiple flags and checks like `!isLoading && !error && data !== null && <div>{data}</div>`. all you need is `matcher.success && <div>{data}</div>`.
 
-### Visualization
+<!-- ### Visualization
 
 To visualize the statecharts in this package, refer to the `/viz`:
 
@@ -106,11 +102,13 @@ To visualize the statecharts in this package, refer to the `/viz`:
 yarn start
 ```
 
-Then go to `http://localhost:3000/?machine=fetchDataMachine` or `http://localhost:3000/?machine=postDataMachine` to get an interactive visulization of the state charts.
+Then go to `http://localhost:3000/?machine=fetchDataMachine` or `http://localhost:3000/?machine=postDataMachine` to get an interactive visulization of the state charts. -->
 
 ### `fetchDataMachine`
 
 ![image](/uploads/ee6b3d50491a7c04a30c5a8358212f1e/image.png)
+
+https://xstate.js.org/viz/?gist=e7160418a7b8ef1562659a710bdf1153
 
 As the diagram illustrates:
 
@@ -123,6 +121,8 @@ As the diagram illustrates:
 
 ![image](/uploads/9d0e96b3894350b9f6e0ad3f24adaa20/image.png)
 
+https://xstate.js.org/viz/?gist=908f3f79147e24637fa2c06473ec0c8b
+
 This machine is very similar to `fetchDataMachine`, but it allows `REQUEST` to be sent on `PostPending` state
 
 - the machine starts from the `Idle` state, on `REQUEST` event it will transition to `PostPending` state invoking `postData` service at the same time.
@@ -130,3 +130,8 @@ This machine is very similar to `fetchDataMachine`, but it allows `REQUEST` to b
 - if `postData` fails, it will send `error` event transitioning the machine to `PostFinished.PostFailed` and executes the action `updateError` to update the context
 - `PostFinished` state (containing 2 sub states) allows another `REQUEST` to be sent, also executes `clearError` if it's in `LoadFailed` state
 - in `PostPending` state, the machine can still take a new `REQUEST`. The old state transition and subsequent invokation and actions will not be executed at all, making sure only the later post request takes effect and updates the data
+
+
+## API
+
+{{>main}}
