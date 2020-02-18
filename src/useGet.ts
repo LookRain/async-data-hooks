@@ -71,7 +71,7 @@ const useGet = <Item>(config: UseGetHookConfig<Item>) => {
   const matcher = useMemo(
     () => ({
       idle: matchState('Idle'),
-      feching: matchState('FetchPending'),
+      fetching: matchState('FetchPending'),
       finished: matchState('LoadFinished'),
       success: matchState('LoadFinished.LoadSucceeded'),
       fail: matchState('LoadFinished.LoadFailed'),
