@@ -2,11 +2,11 @@ import { useMemo, useCallback } from 'react';
 import { useMachine } from '@xstate/react';
 import makeMachine, { StateTypes } from './state-machine/fetchDataMachine';
 
-interface UseGetHookConfig<T> {
+interface UseGetHookConfig<T, V> {
   // Name is used for debugging purpose. Providing a name will turn on devtool debug
   // option in xstate
   name?: string;
-  fetchFn: (params?: { [x: string]: any }) => Promise<T>;
+  fetchFn: (params?: V) => Promise<T>;
 }
 
 /**
@@ -26,7 +26,7 @@ interface UseGetHookConfig<T> {
  * @returns {UseGetReturnedObject} returnedObject
  */
 
-const useGet = <Item>(config: UseGetHookConfig<Item>) => {
+const useGet = <Item, RequestParam>(config: UseGetHookConfig<Item, RequestParam>) => {
   const { name, fetchFn } = config;
   const fetchMachine = useMemo(() => makeMachine<Item>(name), [name]);
 
@@ -46,7 +46,7 @@ const useGet = <Item>(config: UseGetHookConfig<Item>) => {
   // upon entering `pending` state, the machine will then invoke the `fetchData` service
   // that actually executes the side-effect
   const load = useCallback(
-    (params?: { [x: string]: any }) => {
+    (params?: RequestParam) => {
       send({
         type: 'REQUEST',
         params,

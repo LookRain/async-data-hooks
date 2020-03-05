@@ -42,7 +42,7 @@ const usePost = <ReqData, RespData>(
       // This service returns the promise by calling `postFn` with the data user passed in with `post` exposed by the hook
       // The resolution and rejection logic is handled inside the xstate machine
       postData: (_, event) => {
-        return postFn(event.data);
+        return postFn(event.reqData);
       },
     },
   });
