@@ -51,7 +51,6 @@ const useRequest = <Item, RequestParam>(
   // that actually executes the side-effect
   const load = useCallback(
     (params?: RequestParam) => {
-      console.log('hey params????', params);
       send({
         type: 'REQUEST',
         params,
