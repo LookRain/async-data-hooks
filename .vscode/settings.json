@@ -1,0 +1,11 @@
+{
+  "files.watcherExclude": {
+    "**/dist/**": true
+  },
+  "search.exclude": {
+    "**/dist/**": true
+  },
+  "files.exclude": {
+    "**/dist/**": true
+  }
+}
