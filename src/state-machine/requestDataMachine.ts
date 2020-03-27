@@ -100,11 +100,9 @@ const makeMachine = <T>(requestOnLoading: boolean, prefix?: string) => {
             target: 'RequestFail',
             actions: [setError],
           },
-          REQUEST: requestOnLoading
-            ? {
-                target: 'RequestPending',
-              }
-            : '',
+          ...(requestOnLoading && {
+            REQUEST: 'RequestPending',
+          }),
         },
       },
 
@@ -112,12 +110,12 @@ const makeMachine = <T>(requestOnLoading: boolean, prefix?: string) => {
         on: {
           REQUEST: 'RequestPending',
           RESET: 'Idle',
-          SUCCESS: requestOnLoading
-            ? {
-                target: 'RequestSuccess',
-                actions: [setData],
-              }
-            : '',
+          ...(requestOnLoading && {
+            SUCCESS: {
+              target: 'RequestSuccess',
+              actions: [setData],
+            },
+          }),
         },
       },
 
@@ -125,12 +123,12 @@ const makeMachine = <T>(requestOnLoading: boolean, prefix?: string) => {
         on: {
           REQUEST: 'RequestPending',
           RESET: 'Idle',
-          FAIL: requestOnLoading
-            ? {
-                target: 'RequestFail',
-                actions: [setError],
-              }
-            : '',
+          ...(requestOnLoading && {
+            FAIL: {
+              target: 'RequestFail',
+              actions: [setError],
+            },
+          }),
         },
       },
     },
