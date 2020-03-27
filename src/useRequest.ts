@@ -1,4 +1,4 @@
-import {useMemo, useCallback} from 'react';
+import {useMemo, useRef, useCallback} from 'react';
 import {useMachine} from '@xstate/react/lib/fsm';
 import makeMachine from './state-machine/requestDataMachine';
 
@@ -7,6 +7,7 @@ interface UseRequestHookConfig<T, V> {
   // option in xstate
   name?: string;
   requestFn: (params?: V) => Promise<T>;
+  requestOnLoading?: boolean;
 }
 
 /**
@@ -29,18 +30,34 @@ interface UseRequestHookConfig<T, V> {
 const useRequest = <Item, RequestParam>(
   config: UseRequestHookConfig<Item, RequestParam>,
 ) => {
-  const {name, requestFn} = config;
-  const requestMachine = useMemo(() => makeMachine<Item>(name), [name]);
+  const {name, requestFn, requestOnLoading} = config;
+  const requestMachine = useMemo(
+    () => makeMachine<Item>(requestOnLoading || false, name),
+    [name],
+  );
+
+  const prevTimestampRef = useRef(new Date().valueOf());
 
   const [current, send] = useMachine(requestMachine, {
     actions: {
       loadData: async (ctx, event) => {
         if ('params' in event) {
-          const res = await requestFn(event.params);
-          send({
-            type: 'SUCCESS',
-            data: res,
-          });
+          try {
+            const now = new Date().valueOf();
+            prevTimestampRef.current = now;
+            const res = await requestFn(event.params);
+            if (now === prevTimestampRef.current) {
+              send({
+                type: 'SUCCESS',
+                data: res,
+              });
+            }
+          } catch (err) {
+            send({
+              type: 'FAIL',
+              data: err,
+            });
+          }
         }
       },
     },

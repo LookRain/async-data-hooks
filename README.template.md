@@ -1,6 +1,6 @@
 # ⚓Async Data Hooks
 
-A set of React custom hooks for data fetching and posting with xstate integrated, providing precise state transitions
+A set of React custom hooks for data requesting and posting with xstate integrated, providing precise state transitions
 without the risk of yielding impossible states.
 
 ## Installation
@@ -21,10 +21,10 @@ npm install --save async-data-hooks
 
 ## Example usage
 
-### `useGet`
+### `useRequest`
 
 ```tsx
-import { useGet } from 'async-data-hooks';
+import { useRequest } from 'async-data-hooks';
 
 export const getDog = async (params?: { [x: string]: string }) => {
   const res = await getJSON<DogResponseData>(`/api/puppies?${convertToString(params)}`));
@@ -32,9 +32,9 @@ export const getDog = async (params?: { [x: string]: string }) => {
 };
 
 const DogComponent = () => {
-  const { matcher, data, load } = useGet<DogResponseData>({
+  const { matcher, data, load } = useRequest<DogResponseData>({
     name: 'cute puppies', // Optional
-    fetchFn: getDog, // Function that takes in offset, limit and additional params, returns a promise
+    requestFn: getDog, // Function that takes in offset, limit and additional params, returns a promise
   });
 
   return (
@@ -47,7 +47,7 @@ const DogComponent = () => {
         Load default dog
       </button>
 
-      {matcher.fetching && <p>Loading...</p>}
+      {matcher.requesting && <p>Loading...</p>}
 
       {matcher.success && <div>{JSON.stringify(data)}}
     </div>
@@ -55,19 +55,19 @@ const DogComponent = () => {
 };
 ```
 
-If your data is paginated, you need to handle the offset in your own component either in a state or url search param. The hook and state machine knows nothing about your current offset. Your `fetchFn` need to take into consideration the offset and request the correct page.
+If your data is paginated, you need to handle the offset in your own component either in a state or url search param. The hook and state machine knows nothing about your current offset. Your `requestFn` need to take into consideration the offset and request the correct page.
 
-### `usePost`
+### POST requests
 
 ```tsx
-import { usePost } from 'async-data-hooks';
+import { useRequest } from 'async-data-hooks';
 
 const uploadCats = async (cat: Cat) => await postJSON('/api/cats', cat);
 
 const CatsComponent = () => {
-  const { matcher, data, post } = usePost<Cat, CatResponseData>({
+  const { matcher, data, post } = useRequest<Cat, CatResponseData>({
     name: 'upload cats', // Optional
-    postFn: uploadCats, // Function that takes the data to post, returns a promise
+    requestFn: uploadCats, // Function that takes the data to post, returns a promise
   });
 
   return (
@@ -84,7 +84,7 @@ const CatsComponent = () => {
         upload nyan cat
       </button>
 
-      {matcher.fetching && <p>Uploading...</p>}
+      {matcher.requesting && <p>Uploading...</p>}
 
       {matcher.success && (
         <div>
@@ -99,7 +99,7 @@ const CatsComponent = () => {
 
 ## State Machine
 
-Under the hood, a finite state machine determines what state data is in. You can access the state directly from `xstateNode.value`, and compare it manually, or just use the `matchState` function exposed, or use the very handy `matcher` object that contains booleans like `fetching` `success` `fail` for easy state matching.
+Under the hood, a finite state machine determines what state data is in. You can access the state directly from `xstateNode.value`, and compare it manually, or just use the `matchState` function exposed, or use the very handy `matcher` object that contains booleans like `requesting` `success` `fail` for easy state matching.
 With a state machine, all possible state transitions are pre-defined. The benefits of such approach is:
 
 1. Impossible states are avoided automatically. For example:
@@ -118,9 +118,9 @@ To visualize the statecharts in this package, refer to the `/viz`:
 yarn start
 ```
 
-Then go to `http://localhost:3000/?machine=fetchDataMachine` or `http://localhost:3000/?machine=postDataMachine` to get an interactive visulization of the state charts. -->
+Then go to `http://localhost:3000/?machine=requestDataMachine` or `http://localhost:3000/?machine=postDataMachine` to get an interactive visulization of the state charts. -->
 
-### `fetchDataMachine`
+### `requestDataMachine`
 
 ![image](https://user-images.githubusercontent.com/11829847/73526781-e34e8a80-444c-11ea-84ba-9779f720f02e.png)
 
@@ -128,24 +128,10 @@ https://xstate.js.org/viz/?gist=e7160418a7b8ef1562659a710bdf1153
 
 As the diagram illustrates:
 
-- the machine starts from the `Idle` state, on `REQUEST` event it will transition to `FetchPending` state invoking `fetchData` service at the same time.
-- if `fetchData` resolves, it will send `done` event transitioning the machine to `LoadFinished.LoadSucceeded` and executes the action `updateData` to update the context
-- if `fetchData` fails, it will send `error` event transitioning the machine to `LoadFinished.LoadFailed` and executes the action `updateError` to update the context
+- the machine starts from the `Idle` state, on `REQUEST` event it will transition to `RequestPending` state invoking `requestData` service at the same time.
+- if `requestData` resolves, it will send `done` event transitioning the machine to `LoadFinished.LoadSucceeded` and executes the action `updateData` to update the context
+- if `requestData` fails, it will send `error` event transitioning the machine to `LoadFinished.LoadFailed` and executes the action `updateError` to update the context
 - `LoadFinished` state (containing 2 sub states) allows another `REQUEST` to be sent, also executes `clearError` if it's in `LoadFailed` state
-
-### `postDataMachine`
-
-![image](https://user-images.githubusercontent.com/11829847/73526837-fb260e80-444c-11ea-8064-f24add89738d.png)
-
-https://xstate.js.org/viz/?gist=908f3f79147e24637fa2c06473ec0c8b
-
-This machine is very similar to `fetchDataMachine`, but it allows `REQUEST` to be sent on `PostPending` state
-
-- the machine starts from the `Idle` state, on `REQUEST` event it will transition to `PostPending` state invoking `postData` service at the same time.
-- if `postData` resolves, it will send `done` event transitioning the machine to `PostFinished.PostSucceeded` and executes the action `updateData` to update the context
-- if `postData` fails, it will send `error` event transitioning the machine to `PostFinished.PostFailed` and executes the action `updateError` to update the context
-- `PostFinished` state (containing 2 sub states) allows another `REQUEST` to be sent, also executes `clearError` if it's in `LoadFailed` state
-- in `PostPending` state, the machine can still take a new `REQUEST`. The old state transition and subsequent invokation and actions will not be executed at all, making sure only the later post request takes effect and updates the data
 
 
 ## API

@@ -6,7 +6,7 @@ export type StateTypes =
   | 'RequestSuccess'
   | 'RequestFail';
 
-const makeMachine = <T>(prefix?: string) => {
+const makeMachine = <T>(requestOnLoading: boolean, prefix?: string) => {
   type RequestDataMachineEvent =
     | {type: 'SUCCESS'; data: T}
     | {type: 'FAIL'; data: Error}
@@ -15,6 +15,7 @@ const makeMachine = <T>(prefix?: string) => {
   type RequestDataMachineContext = {
     data?: T | undefined;
     error?: Error | undefined;
+    timestamp?: number | undefined;
   };
   type RequestDataMachineState =
     | {
@@ -46,6 +47,25 @@ const makeMachine = <T>(prefix?: string) => {
         };
       };
 
+  const setData = assign({
+    data: (
+      _,
+      event: {
+        type: 'SUCCESS';
+        data: T;
+      },
+    ) => (event.type === 'SUCCESS' ? event.data : (event as any).data),
+  });
+
+  const setError = assign({
+    error: (
+      _,
+      event: {
+        type: 'FAIL';
+        data: Error;
+      },
+    ) => (event.type === 'FAIL' ? event.data : (event as any).data),
+  });
   return createMachine<
     RequestDataMachineContext,
     RequestDataMachineEvent,
@@ -58,29 +78,33 @@ const makeMachine = <T>(prefix?: string) => {
         on: {
           REQUEST: 'RequestPending',
         },
-        entry: ['clearError', 'clearData'],
+        entry: [
+          assign({
+            data: (_, event) =>
+              event.type === 'RESET' ? undefined : undefined,
+          }),
+          assign({
+            data: (_, event) =>
+              event.type === 'RESET' ? undefined : undefined,
+          }),
+        ],
       },
       RequestPending: {
         entry: ['loadData'],
         on: {
           SUCCESS: {
             target: 'RequestSuccess',
-            actions: [
-              assign({
-                data: (_, event) =>
-                  event.type === 'SUCCESS' ? event.data : (event as any).data,
-              }),
-            ],
+            actions: [setData],
           },
           FAIL: {
             target: 'RequestFail',
-            actions: [
-              assign({
-                error: (_, event) =>
-                  event.type === 'FAIL' ? event.data : (event as any).data,
-              }),
-            ],
+            actions: [setError],
           },
+          REQUEST: requestOnLoading
+            ? {
+                target: 'RequestPending',
+              }
+            : '',
         },
       },
 
@@ -88,26 +112,26 @@ const makeMachine = <T>(prefix?: string) => {
         on: {
           REQUEST: 'RequestPending',
           RESET: 'Idle',
+          SUCCESS: requestOnLoading
+            ? {
+                target: 'RequestSuccess',
+                actions: [setData],
+              }
+            : '',
         },
-        exit: [
-          assign({
-            data: (_, event) =>
-              event.type === 'RESET' ? undefined : undefined,
-          }),
-        ],
       },
 
       RequestFail: {
         on: {
           REQUEST: 'RequestPending',
           RESET: 'Idle',
+          FAIL: requestOnLoading
+            ? {
+                target: 'RequestFail',
+                actions: [setError],
+              }
+            : '',
         },
-        exit: [
-          assign({
-            data: (_, event) =>
-              event.type === 'RESET' ? undefined : undefined,
-          }),
-        ],
       },
     },
   });
